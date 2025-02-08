@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "pw.masy.biomespreader.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "PotionEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

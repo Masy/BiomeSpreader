@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:splash_potion",
+    "minecraft:pale_oak_sapling",
+    "minecraft:blaze_powder",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "minecraft:splash_potion",
+    "count": 1,
+    "components": {
+      "minecraft:custom_name": "\"Pale Garden Fertilizer\"",
+      "minecraft:potion_contents": {
+        "custom_name": "pale_garden_fertilizer",
+        "custom_color": 8825465,
+        "potion": "minecraft:poison"
+      },
+      "minecraft:hide_additional_tooltip": {},
+      "minecraft:lore": [
+        "\"Spreads the pale garden biome\""
+      ]
+    }
+  }
+}

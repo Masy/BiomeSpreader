@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "biome-spreader",
+  "version": "${version}",
+  "name": "BiomeSpreader",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/biome-spreader/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "pw.masy.biomespreader.BiomeSpreader"
+    ]
+  },
+  "mixins": [
+    "biomespreader.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

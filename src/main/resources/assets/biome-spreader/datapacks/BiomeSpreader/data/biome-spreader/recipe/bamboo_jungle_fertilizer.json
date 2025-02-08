@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:splash_potion",
+    "minecraft:bamboo",
+    "minecraft:blaze_powder",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "minecraft:splash_potion",
+    "count": 1,
+    "components": {
+      "minecraft:custom_name": "\"Bamboo Jungle Fertilizer\"",
+      "minecraft:potion_contents": {
+        "custom_name": "bamboo_jungle_fertilizer",
+        "custom_color": 6336559,
+        "potion": "minecraft:poison"
+      },
+      "minecraft:hide_additional_tooltip": {},
+      "minecraft:lore": [
+        "\"Spreads the bamboo jungle biome\""
+      ]
+    }
+  }
+}
