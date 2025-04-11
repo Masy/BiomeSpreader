@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Plains Fertilizer\"",
+      "minecraft:custom_name": "Plains Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "plains_fertilizer",
         "custom_color": 6795587,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the plains biome\""
+        "Spreads the plains biome"
       ]
     }
   }

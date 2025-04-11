@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Meadow Fertilizer\"",
+      "minecraft:custom_name": "Meadow Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "meadow_fertilizer",
         "custom_color": 3785830,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the meadow biome\""
+        "Spreads the meadow biome"
       ]
     }
   }

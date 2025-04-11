@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Mushroom Fields Fertilizer\"",
+      "minecraft:custom_name": "Mushroom Fields Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "mushroom_fields_fertilizer",
         "custom_color": 10648992,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the mushroom fields biome\""
+        "Spreads the mushroom fields biome"
       ]
     }
   }

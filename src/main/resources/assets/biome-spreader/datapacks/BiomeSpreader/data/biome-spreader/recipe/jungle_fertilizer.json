@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Jungle Fertilizer\"",
+      "minecraft:custom_name": "Jungle Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "jungle_fertilizer",
         "custom_color": 1567232,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the jungle biome\""
+        "Spreads the jungle biome"
       ]
     }
   }
