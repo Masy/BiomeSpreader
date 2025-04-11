@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Birch Forest Fertilizer\"",
+      "minecraft:custom_name": "Birch Forest Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "birch_forest_fertilizer",
         "custom_color": 8634624,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the birch forest biome\""
+        "Spreads the birch forest biome"
       ]
     }
   }

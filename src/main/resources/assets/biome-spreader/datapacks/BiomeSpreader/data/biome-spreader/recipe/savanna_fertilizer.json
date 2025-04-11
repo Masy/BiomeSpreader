@@ -10,15 +10,19 @@
     "id": "minecraft:splash_potion",
     "count": 1,
     "components": {
-      "minecraft:custom_name": "\"Savanna Fertilizer\"",
+      "minecraft:custom_name": "Savanna Fertilizer",
       "minecraft:potion_contents": {
         "custom_name": "savanna_fertilizer",
         "custom_color": 11782420,
         "potion": "minecraft:poison"
       },
-      "minecraft:hide_additional_tooltip": {},
+      "minecraft:tooltip_display": {
+        "hidden_components": [
+          "minecraft:potion_contents"
+        ]
+      },
       "minecraft:lore": [
-        "\"Spreads the savanna biome\""
+        "Spreads the savanna biome"
       ]
     }
   }
