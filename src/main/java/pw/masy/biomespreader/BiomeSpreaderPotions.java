@@ -65,7 +65,11 @@ public class BiomeSpreaderPotions {
                 spread = center.getY() - blockY  < radius;
             }
 
-            return spread ? biome : generatedBiome;
+            if (!spread)
+                return generatedBiome;
+
+            counter.increment();
+            return biome;
         };
     }
 
@@ -98,8 +102,9 @@ public class BiomeSpreaderPotions {
         for (Chunk chunk : chunkList) {
             counter.setValue(0);
             chunk.populateBiomes(createBiomeSupplier(counter, chunk, center, radius, biome, (biomex) -> !BiomeSpreader.config.biomeBlacklist.contains(biomex.getIdAsString())), world.getChunkManager().getNoiseConfig().getMultiNoiseSampler());
-            if (counter.getValue() > 0)
+            if (counter.getValue() > 0) {
                 chunk.markNeedsSaving();
+            }
         }
         world.getChunkManager().chunkLoadingManager.sendChunkBiomePackets(chunkList);
     }
