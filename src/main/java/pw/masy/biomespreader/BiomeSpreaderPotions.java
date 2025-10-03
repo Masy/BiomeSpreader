@@ -114,14 +114,14 @@ public class BiomeSpreaderPotions {
      */
     public static void registerCallback() {
         SplashPotionCallback.EVENT.register((potion -> {
-            if (potion.getWorld().isClient())
+            if (potion.getEntityWorld().isClient())
                 return ActionResult.FAIL;
 
             final PotionContentsComponent potionContentsComponent = potion.getStack().getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
             if (potionContentsComponent.customName().isEmpty())
                 return ActionResult.FAIL;
 
-            ServerWorld world = (ServerWorld) potion.getWorld();
+            ServerWorld world = (ServerWorld) potion.getEntityWorld();
             if ((world.getRegistryKey() == ServerWorld.OVERWORLD && !BiomeSpreader.config.allowInOverworld)
                 || (world.getRegistryKey() == ServerWorld.NETHER && !BiomeSpreader.config.allowInNether)
                 || (world.getRegistryKey() == ServerWorld.END && !BiomeSpreader.config.allowInEnd))
