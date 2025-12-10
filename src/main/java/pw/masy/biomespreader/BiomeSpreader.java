@@ -1,13 +1,15 @@
 package pw.masy.biomespreader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class BiomeSpreader implements ModInitializer {
@@ -23,15 +25,26 @@ public class BiomeSpreader implements ModInitializer {
      * @throws IOException when the config file could not be opened or saved.
      */
     public static void loadConfig() throws IOException {
-        final Path configFile = Path.of("config/BiomeSpreader.json");
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        if (!Files.exists(configFile)) {
-            mapper.writeValue(configFile.toFile(), config);
-            return;
-        }
+        final File configFile = Path.of("config", "BiomeSpreader.json").toFile();
+        if (!configFile.getParentFile().mkdirs())
+            throw new RuntimeException("Failed to create config dir");
 
-        config = mapper.readValue(configFile.toFile(), BiomeSpreaderConfig.class);
+        Gson gson = new GsonBuilder().create();
+
+        try {
+            if (configFile.exists()) {
+                try (FileReader reader = new FileReader(configFile)) {
+                    config = gson.fromJson(reader, BiomeSpreaderConfig.class);
+                    return;
+                }
+            }
+
+            try (FileWriter writer = new FileWriter(configFile)) {
+                gson.toJson(config, writer);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to load BiomeSpreader config");
+        }
     }
 
     /**

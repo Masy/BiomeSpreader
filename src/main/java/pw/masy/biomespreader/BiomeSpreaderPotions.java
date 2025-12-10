@@ -102,7 +102,7 @@ public class BiomeSpreaderPotions {
         for (Chunk chunk : chunkList) {
             counter.setValue(0);
             chunk.populateBiomes(createBiomeSupplier(counter, chunk, center, radius, biome, (biomex) -> !BiomeSpreader.config.biomeBlacklist.contains(biomex.getIdAsString())), world.getChunkManager().getNoiseConfig().getMultiNoiseSampler());
-            if (counter.getValue() > 0) {
+            if (counter.intValue() > 0) {
                 chunk.markNeedsSaving();
             }
         }

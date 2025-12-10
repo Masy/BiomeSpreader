@@ -79,7 +79,7 @@ public class DataPackCreator {
                     }
                 });
             }
-            server.getCommandManager().executeWithPrefix(server.getCommandSource(), "reload");
+            server.getCommandManager().parseAndExecute(server.getCommandSource(), "reload");
         } catch (IOException | URISyntaxException ex) {
             ex.printStackTrace();
         }
