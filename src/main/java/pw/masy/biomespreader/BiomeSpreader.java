@@ -26,7 +26,8 @@ public class BiomeSpreader implements ModInitializer {
      */
     public static void loadConfig() throws IOException {
         final File configFile = Path.of("config", "BiomeSpreader.json").toFile();
-        if (!configFile.getParentFile().mkdirs())
+        final File configDir = configFile.getParentFile();
+        if (!configDir.exists() && !configDir.mkdirs())
             throw new RuntimeException("Failed to create config dir");
 
         Gson gson = new GsonBuilder().create();
