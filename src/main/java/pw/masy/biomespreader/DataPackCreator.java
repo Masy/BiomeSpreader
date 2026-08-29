@@ -1,7 +1,7 @@
 package pw.masy.biomespreader;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,7 @@ public class DataPackCreator {
      * @param server The instance of the minecraft server.
      */
     public static void createDataPack(MinecraftServer server) {
-        final Path dataPackPath = server.getSavePath(WorldSavePath.DATAPACKS).resolve("BiomeSpreader");
+        final Path dataPackPath = server.getWorldPath(LevelResource.DATAPACK_DIR).resolve("BiomeSpreader");
 
         try {
             if (!Files.exists(dataPackPath))
@@ -79,7 +79,7 @@ public class DataPackCreator {
                     }
                 });
             }
-            server.getCommandManager().parseAndExecute(server.getCommandSource(), "reload");
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "reload");
         } catch (IOException | URISyntaxException ex) {
             ex.printStackTrace();
         }

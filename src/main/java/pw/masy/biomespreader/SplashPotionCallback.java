@@ -2,8 +2,8 @@ package pw.masy.biomespreader;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.projectile.thrown.PotionEntity;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 
 public interface SplashPotionCallback {
 
@@ -13,20 +13,20 @@ public interface SplashPotionCallback {
     Event<SplashPotionCallback> EVENT = EventFactory.createArrayBacked(SplashPotionCallback.class,
             (listeners) -> (potion) -> {
                 for (SplashPotionCallback listener : listeners) {
-                    ActionResult result = listener.onSplash(potion);
-                    if (result != ActionResult.PASS)
+                    InteractionResult result = listener.onSplash(potion);
+                    if (result != InteractionResult.PASS)
                         return result;
                 }
 
-                return ActionResult.PASS;
+                return InteractionResult.PASS;
             });
 
     /**
      * Method which is called for each registered splash potion callback.
      *
      * @param potion The potion entity that collided.
-     * @return An action result.
+     * @return An interaction result.
      */
-    ActionResult onSplash(PotionEntity potion);
+    InteractionResult onSplash(ThrownSplashPotion potion);
 
 }
