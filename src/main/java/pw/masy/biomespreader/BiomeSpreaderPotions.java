@@ -1,20 +1,22 @@
 package pw.masy.biomespreader;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.BiomeSupplier;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
@@ -30,10 +32,10 @@ public class BiomeSpreaderPotions {
     private static final int CHUNK_SIZE = 16;
 
     /**
-     * Creates a biome supplier with the given parameters.
+     * Creates a biome resolver with the given parameters.
      * <p>
-     *     The biome supplier checks if the given biome can be spread at the biome coordinates
-     *     that are passed to the getBiome() method of the supplier.
+     *     The biome resolver checks if the given biome can be spread at the biome coordinates
+     *     that are passed to the getNoiseBiome() method of the resolver.
      * </p>
      *
      * @param counter A counter that is incremented if the biome was changed.
@@ -42,16 +44,16 @@ public class BiomeSpreaderPotions {
      * @param radius The radius of the spread in blocks.
      * @param biome The registry entry of the biome that should be spread.
      * @param filter A filter that additionally determines if the biome at the given coordinates can be changed.
-     * @return The biome supplier.
+     * @return The biome resolver.
      */
-    private static BiomeSupplier createBiomeSupplier(MutableInt counter, final Chunk chunk, final BlockPos center, final int radius, final RegistryEntry<Biome> biome, Predicate<RegistryEntry<Biome>> filter) {
-        return (x, y, z, noise) -> {
-            final int blockX = BiomeCoords.toBlock(x);
-            final int blockY = BiomeCoords.toBlock(y);
-            final int blockZ = BiomeCoords.toBlock(z);
+    private static BiomeResolver createBiomeResolver(MutableInt counter, final ChunkAccess chunk, final BlockPos center, final int radius, final Holder<Biome> biome, Predicate<Holder<Biome>> filter) {
+        return (x, y, z, sampler) -> {
+            final int blockX = QuartPos.toBlock(x);
+            final int blockY = QuartPos.toBlock(y);
+            final int blockZ = QuartPos.toBlock(z);
             final int dX = blockX - center.getX();
             final int dZ = blockZ - center.getZ();
-            final RegistryEntry<Biome> generatedBiome = chunk.getBiomeForNoiseGen(x, y, z);
+            final Holder<Biome> generatedBiome = chunk.getNoiseBiome(x, y, z);
             if (!filter.test(generatedBiome))
                 return generatedBiome;
 
@@ -76,20 +78,20 @@ public class BiomeSpreaderPotions {
     /**
      * Tries to spread the given biome at the center coordinate.
      *
-     * @param world The world the biome is spread in.
+     * @param level The level the biome is spread in.
      * @param center The block position from where the biome will be spread.
      * @param radius The radius of the spread in blocks.
      * @param biome The registry entry of the biome that will be spread.
-     * @see BiomeSpreaderPotions#createBiomeSupplier(MutableInt, Chunk, BlockPos, int, RegistryEntry, Predicate)
+     * @see BiomeSpreaderPotions#createBiomeResolver(MutableInt, ChunkAccess, BlockPos, int, Holder, Predicate)
      */
-    public static void spreadBiome(ServerWorld world, final BlockPos center, final int radius, final RegistryEntry<Biome> biome) {
-        List<Chunk> chunkList = new ArrayList<>();
+    public static void spreadBiome(ServerLevel level, final BlockPos center, final int radius, final Holder<Biome> biome) {
+        List<ChunkAccess> chunkList = new ArrayList<>();
 
         for (int z = center.getZ() - radius; z <= center.getZ() + radius; z += CHUNK_SIZE) {
             for (int x = center.getX() - radius; x <= center.getX() + radius; x += CHUNK_SIZE) {
-                final int chunkX = ChunkSectionPos.getSectionCoord(x);
-                final int chunkZ = ChunkSectionPos.getSectionCoord(z);
-                Chunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+                final int chunkX = SectionPos.blockToSectionCoord(x);
+                final int chunkZ = SectionPos.blockToSectionCoord(z);
+                ChunkAccess chunk = level.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
                 if (chunk == null)
                     continue;
 
@@ -98,15 +100,25 @@ public class BiomeSpreaderPotions {
         }
 
         MutableInt counter = new MutableInt(0);
+        Climate.Sampler sampler = level.getChunkSource().randomState().sampler();
 
-        for (Chunk chunk : chunkList) {
+        for (ChunkAccess chunk : chunkList) {
             counter.setValue(0);
-            chunk.populateBiomes(createBiomeSupplier(counter, chunk, center, radius, biome, (biomex) -> !BiomeSpreader.config.biomeBlacklist.contains(biomex.getIdAsString())), world.getChunkManager().getNoiseConfig().getMultiNoiseSampler());
+            BiomeResolver resolver = createBiomeResolver(counter, chunk, center, radius, biome, (biomeHolder) -> !BiomeSpreader.config.biomeBlacklist.contains(biomeHolder.unwrapKey().map(key -> key.identifier().toString()).orElse("")));
+
+            final int quartMinX = QuartPos.fromBlock(chunk.getPos().getMinBlockX());
+            final int quartMinZ = QuartPos.fromBlock(chunk.getPos().getMinBlockZ());
+            for (int sectionY = level.getMinSectionY(); sectionY <= level.getMaxSectionY(); sectionY++) {
+                final LevelChunkSection section = chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY));
+                section.fillBiomesFromNoise(resolver, sampler, quartMinX, QuartPos.fromSection(sectionY), quartMinZ);
+            }
+
             if (counter.intValue() > 0) {
-                chunk.markNeedsSaving();
+                chunk.markUnsaved();
             }
         }
-        world.getChunkManager().chunkLoadingManager.sendChunkBiomePackets(chunkList);
+
+        level.getChunkSource().chunkMap.resendBiomesForChunks(chunkList);
     }
 
     /**
@@ -114,29 +126,29 @@ public class BiomeSpreaderPotions {
      */
     public static void registerCallback() {
         SplashPotionCallback.EVENT.register((potion -> {
-            if (potion.getEntityWorld().isClient())
-                return ActionResult.FAIL;
+            if (potion.level().isClientSide())
+                return InteractionResult.FAIL;
 
-            final PotionContentsComponent potionContentsComponent = potion.getStack().getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
-            if (potionContentsComponent.customName().isEmpty())
-                return ActionResult.FAIL;
+            final PotionContents potionContents = potion.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+            if (potionContents.customName().isEmpty())
+                return InteractionResult.FAIL;
 
-            ServerWorld world = (ServerWorld) potion.getEntityWorld();
-            if ((world.getRegistryKey() == ServerWorld.OVERWORLD && !BiomeSpreader.config.allowInOverworld)
-                || (world.getRegistryKey() == ServerWorld.NETHER && !BiomeSpreader.config.allowInNether)
-                || (world.getRegistryKey() == ServerWorld.END && !BiomeSpreader.config.allowInEnd))
-                return ActionResult.FAIL;
+            ServerLevel level = (ServerLevel) potion.level();
+            if ((level.dimension() == ServerLevel.OVERWORLD && !BiomeSpreader.config.allowInOverworld)
+                || (level.dimension() == ServerLevel.NETHER && !BiomeSpreader.config.allowInNether)
+                || (level.dimension() == ServerLevel.END && !BiomeSpreader.config.allowInEnd))
+                return InteractionResult.FAIL;
 
-            final Registry<Biome> biomeRegistry = world.getRegistryManager().getOrThrow(RegistryKeys.BIOME);
-            final BlockPos center = potion.getBlockPos();
+            final Registry<Biome> biomeRegistry = level.registryAccess().lookupOrThrow(Registries.BIOME);
+            final BlockPos center = potion.blockPosition();
 
-            final String name = potionContentsComponent.customName().get();
-            final Optional<RegistryEntry.Reference<Biome>> biome = biomeRegistry.getEntry(Identifier.ofVanilla(name.substring(0, name.indexOf("_fertilizer"))));
+            final String name = potionContents.customName().get();
+            final Optional<Holder.Reference<Biome>> biome = biomeRegistry.get(Identifier.withDefaultNamespace(name.substring(0, name.indexOf("_fertilizer"))));
             if (biome.isEmpty())
-                return ActionResult.FAIL;
+                return InteractionResult.FAIL;
 
-            spreadBiome(world, center, BiomeSpreader.config.radius, biome.get());
-            return ActionResult.PASS;
+            spreadBiome(level, center, BiomeSpreader.config.radius, biome.get());
+            return InteractionResult.PASS;
         }));
     }
 }
