@@ -47,7 +47,7 @@ public class BiomeSpreaderPotions {
      * @return The biome resolver.
      */
     private static BiomeResolver createBiomeResolver(MutableInt counter, final ChunkAccess chunk, final BlockPos center, final int radius, final Holder<Biome> biome, Predicate<Holder<Biome>> filter) {
-        return (x, y, z, sampler) -> {
+        return (x, y, z) -> {
             final int blockX = QuartPos.toBlock(x);
             final int blockY = QuartPos.toBlock(y);
             final int blockZ = QuartPos.toBlock(z);
@@ -100,7 +100,6 @@ public class BiomeSpreaderPotions {
         }
 
         MutableInt counter = new MutableInt(0);
-        Climate.Sampler sampler = level.getChunkSource().randomState().sampler();
 
         for (ChunkAccess chunk : chunkList) {
             counter.setValue(0);
@@ -110,7 +109,7 @@ public class BiomeSpreaderPotions {
             final int quartMinZ = QuartPos.fromBlock(chunk.getPos().getMinBlockZ());
             for (int sectionY = level.getMinSectionY(); sectionY <= level.getMaxSectionY(); sectionY++) {
                 final LevelChunkSection section = chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY));
-                section.fillBiomesFromNoise(resolver, sampler, quartMinX, QuartPos.fromSection(sectionY), quartMinZ);
+                section.fillBiomesFromNoise(resolver, quartMinX, QuartPos.fromSection(sectionY), quartMinZ);
             }
 
             if (counter.intValue() > 0) {
